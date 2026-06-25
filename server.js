@@ -307,7 +307,10 @@ app.get('/api/multi-admin/bookings', multiAdminAuth, async (req, res) => {
 
 // --- SERVE PAGES ---
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views/calendar.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views/index.html')));
+
+// Booking Calendar Page
+app.get('/booking', (req, res) => res.sendFile(path.join(__dirname, 'views/calendar.html')));
 
 // Standard Login Page
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'views/login/login.html')));

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome — Collaborators Booking Portal</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans, sans-serif);
+            margin: 0;
+        }
+
+        .landing-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8, 32px) var(--space-4, 16px);
+            background: radial-gradient(circle at top right, rgba(0, 122, 204, 0.05), transparent 60%);
+        }
+
+        .landing-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: var(--space-10, 48px) var(--space-8, 32px);
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .landing-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .landing-logo {
+            font-size: 3rem;
+            margin-bottom: var(--space-4, 16px);
+        }
+
+        .landing-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: var(--space-3, 12px);
+            letter-spacing: -0.02em;
+        }
+
+        .landing-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: var(--space-8, 32px);
+        }
+
+        .landing-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4, 16px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 600px) {
+            .landing-actions {
+                flex-direction: row;
+            }
+        }
+
+        .btn-landing {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--radius);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 600px) {
+            .btn-landing {
+                width: auto;
+            }
+        }
+
+        .btn-primary {
+            background: var(--accent, #007acc);
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 14px rgba(0, 122, 204, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 122, 204, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-4, 16px);
+            margin-top: var(--space-10, 48px);
+            text-align: left;
+            border-top: 1px solid var(--border);
+            padding-top: var(--space-8, 32px);
+        }
+
+        @media (min-width: 600px) {
+            .feature-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 12px;
+        }
+
+        .feature-icon {
+            font-size: 1.25rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feature-text h4 {
+            margin: 0 0 4px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .feature-text p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <main class="landing-container">
+        <div class="landing-card">
+            <div class="landing-logo">📅</div>
+            <h1 class="landing-title">Collaborators Booking Portal</h1>
+            <p class="landing-subtitle">
+                Access booking slots, coordinate schedule zones, and manage collaborators inside the portal.
+            </p>
+
+            <div class="landing-actions">
+                <a href="/booking" class="btn-landing btn-primary">Book a Slot</a>
+                <a href="/project-login" class="btn-landing btn-secondary">Owner Dashboard</a>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">⚡</span>
+                    <div class="feature-text">
+                        <h4>Real-time Booking</h4>
+                        <p>Instantly claim slots and get immediate confirmations.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🌐</span>
+                    <div class="feature-text">
+                        <h4>Multi-Timezone</h4>
+                        <p>Easily view and manage times synced to any zone.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="/js/loader.js"></script>
+    <script src="/js/theme.js"></script>
+</body>
+</html>
