@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Timezone Slot Selection — Collaborators Booking Portal</title>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/calendar.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <div class="calendar-page">
+        <h2 class="calendar-heading">🔍 Slot Selection</h2>
+        <p class="calendar-notice">Please book collaborator slots. Only book staff slots if you are staff.</p>
+
+        <div class="timezone-selector-container">
+            <label for="tz-selector">Viewing in Timezone:</label>
+            <select id="tz-selector" class="timezone-select">
+                <optgroup label="Your System">
+                    <option value="local">Your Local Time</option>
+                    <option value="UTC">UTC / GMT</option>
+                </optgroup>
+                <optgroup label="North America">
+                    <option value="America/New_York">Eastern Time (ET)</option>
+                    <option value="America/Chicago">Central Time (CT)</option>
+                    <option value="America/Denver">Mountain Time (MT)</option>
+                    <option value="America/Phoenix">Arizona (MST, no DST)</option>
+                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                    <option value="America/Anchorage">Alaska Time (AKT)</option>
+                    <option value="Pacific/Honolulu">Hawaii Time (HST)</option>
+                </optgroup>
+                <optgroup label="Europe">
+                    <option value="Europe/London">London / Dublin (GMT/BST)</option>
+                    <option value="Europe/Paris">Paris / Berlin / Rome (CET/CEST)</option>
+                    <option value="Europe/Athens">Athens / Cairo / Istanbul (EET)</option>
+                </optgroup>
+                <optgroup label="Asia &amp; Middle East">
+                    <option value="Asia/Dubai">Dubai / Gulf (GST)</option>
+                    <option value="Asia/Kolkata">India (IST)</option>
+                    <option value="Asia/Bangkok">Bangkok / Jakarta (ICT)</option>
+                    <option value="Asia/Singapore">Singapore / Hong Kong (SGT)</option>
+                    <option value="Asia/Tokyo">Tokyo / Seoul (JST)</option>
+                </optgroup>
+                <optgroup label="Australia &amp; Pacific">
+                    <option value="Australia/Perth">Perth (AWST)</option>
+                    <option value="Australia/Adelaide">Adelaide (ACST)</option>
+                    <option value="Australia/Sydney">Sydney / Melbourne (AEST)</option>
+                    <option value="Pacific/Auckland">Auckland / Fiji (NZST)</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div id='calendar'></div>
+    </div>
+
+    <!-- Booking management modal -->
+    <dialog id="bookingModal">
+        <h3 id="modalTitle" class="modal-header">Manage Booking</h3>
+        <div class="modal-body">Select an action to execute for this slot:</div>
+        <div class="modal-actions">
+            <button id="modalNoShowBtn" class="modal-btn btn-modal-noshow">Mark as No Show</button>
+            <button id="modalCancelBtn" class="modal-btn btn-modal-cancel">Cancel &amp; Clear Booking</button>
+            <button id="modalCloseBtn" class="modal-btn btn-modal-close">Close</button>
+        </div>
+    </dialog>
+
+    <div id="footer-container"></div>
+    <script src="./js/loader.js"></script>
+    <script src="./js/theme.js"></script>
+    <script src="./js/calendar-multi-admin.js"></script>
+</body>
+</html>

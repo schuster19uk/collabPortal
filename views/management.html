@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Dashboard — Collaborators Booking Portal</title>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/calendar.css">
+    <link rel="stylesheet" href="/css/management.css">
+    <link rel="stylesheet" href="/css/todo.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+    <!-- Management uses its own inline navbar (with logout button) instead of the shared one -->
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <span class="brand-dot"></span>
+            Management Dashboard
+        </a>
+        <div class="navbar-actions">
+            <a href="/" class="btn-view-public">👁 View Booking Site</a>
+            <button id="logoutBtn" class="btn-logout">Logout</button>
+        </div>
+
+    <div class="topbar-actions">
+    <button class="btn btn-ghost" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#9790;</button>
+    </div>
+    
+    </nav>
+
+    <div class="management-page" style="display: flex; flex-direction: column; gap: var(--space-8); max-width: var(--max-width); margin: 0 auto;">
+        
+        <!-- SECTION 1: Booking Management Calendar -->
+        <section>
+            <h2 style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--text); margin-bottom: var(--space-4); border-bottom: 1px solid var(--border); padding-bottom: var(--space-2);">Booking Schedule</h2>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box legend-box-open"></div> Open Slot
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box legend-box-booked"></div> Booked
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box legend-box-noshow"></div> No Show
+                </div>
+            </div>
+            <div id='calendar' class="management"></div>
+        </section>
+
+        <!-- SECTION 2: Personal Task Board -->
+        <section class="todo-section">
+            <h2 style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 600; color: var(--text); margin-bottom: var(--space-4); border-bottom: 1px solid var(--border); padding-bottom: var(--space-2);">Personal Task Board</h2>
+            
+            <div class="filters-bar" style="display: flex; gap: var(--space-4, 16px); padding: var(--space-4, 16px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); align-items: center; flex-wrap: wrap; margin-bottom: var(--space-4);">
+                <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">Filter Board:</div>
+                <div>
+                    <select id="filter_project" onchange="applyBoardFilters()" style="padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius);">
+                        <option value="">All Projects</option>
+                    </select>
+                </div>
+                <button onclick="clearBoardFilters()" class="btn" style="padding: 6px 12px; font-size: 0.85rem; background: transparent; border: 1px solid var(--border); color: var(--text-muted);">
+                    Clear Filters
+                </button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-val" id="statTotal">—</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val text-accent" id="statTodo">—</div>
+                    <div class="stat-label">To Do</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="statInProgress" style="color:var(--accent-2)">—</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val text-success" id="statDone">—</div>
+                    <div class="stat-label">Done</div>
+                </div>
+            </div>
+
+            <!-- QUICK CREATE BAR -->
+            <div class="quick-create-bar" style="display: flex; gap: var(--space-3, 12px); padding: var(--space-4, 16px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); align-items: flex-start; flex-wrap: wrap; margin-bottom: var(--space-4, 16px);">
+                <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted); min-width: 80px; margin-top: 8px;">Quick Add:</div>
+                <textarea id="quick_title" placeholder="Type a task title... &#10;Press Enter to save. Use Shift + Enter for a new line." maxlength="230" 
+                style="flex: 1; min-width: 250px; height: 70px; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); resize: vertical; overflow-y: auto; font-family: inherit; font-size: 0.95rem; line-height: 1.4;" 
+                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); quickCreateTask(); }"></textarea>
+            </div>
+
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="filter-group" id="statusFilters">
+                        <button class="pill active" data-status="all">All (Exclude Completed)</button>
+                        <button class="pill" data-status="1">To Do</button>
+                        <button class="pill" data-status="2">In Progress</button>
+                        <button class="pill" data-status="3">Done</button>
+                    </div>
+                </div>
+                <input class="search-box" type="text" id="searchInput" placeholder="Search tasks...">
+            </div>
+
+            <div class="task-table-wrap">
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th style="width:35%">Task</th>
+                            <th>Assignee</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Due</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskBody">
+                        <tr><td colspan="5"><div class="loading">Loading tasks...</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <dialog id="bookingModal">
+        <h3 id="modalTitle" class="modal-header">Manage Booking</h3>
+        <div class="modal-body">Select an action to perform on this slot:</div>
+        <div class="modal-actions">
+            <button id="modalNoShowBtn" class="modal-btn btn-modal-noshow">Mark as No Show</button>
+            <button id="modalCancelBtn" class="modal-btn btn-modal-cancel">Cancel &amp; Reset Booking</button>
+            <button id="modalCloseBtn" class="modal-btn btn-modal-close">Close</button>
+        </div>
+    </dialog>
+
+    <script src="./js/calendar-management.js"></script>
+    <script src="./js/loader.js"></script>
+    <script src="./js/theme.js"></script>
+    <script src="./js/todo.js"></script>
+    <div id="footer-container"></div>
+</body>
+</html>
