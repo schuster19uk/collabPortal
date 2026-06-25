@@ -1,4 +1,4 @@
-/* landing.css - Styling for the index.html welcome page */
+/* landing.css - Full-width section layout for the welcome page */
 
 body {
     display: flex;
@@ -10,91 +10,95 @@ body {
     margin: 0;
 }
 
-.landing-container {
+/* ── Main wrapper ─────────────────────────────────────────── */
+main {
     flex: 1;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+}
+
+/* ── Hero section ─────────────────────────────────────────── */
+.landing-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
-    padding: var(--space-8, 32px) var(--space-4, 16px);
-    background: radial-gradient(circle at top right, rgba(0, 122, 204, 0.05), transparent 60%);
-}
-
-.landing-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: var(--space-10, 48px) var(--space-8, 32px);
+    padding: var(--space-16, 80px) var(--space-12, 64px);
+    max-width: 900px;
+    margin: 0 auto;
     width: 100%;
-    max-width: 600px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.landing-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    box-sizing: border-box;
 }
 
 .landing-logo {
-    font-size: 3rem;
-    margin-bottom: var(--space-4, 16px);
+    font-size: 2.5rem;
+    margin-bottom: var(--space-5, 20px);
 }
 
 .landing-title {
-    font-size: 2.25rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 700;
     color: var(--text);
-    margin-bottom: var(--space-3, 12px);
-    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-4, 16px) 0;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
 }
 
 .landing-subtitle {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: var(--space-8, 32px);
+    line-height: 1.7;
+    margin: 0;
+    max-width: 520px;
 }
 
-.feature-grid {
+/* ── Features section ─────────────────────────────────────── */
+.feature-list {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-12, 64px);
+    box-sizing: border-box;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-4, 16px);
-    margin-top: var(--space-10, 48px);
-    text-align: left;
-    border-top: 1px solid var(--border);
-    padding-top: var(--space-8, 32px);
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-10, 48px) var(--space-8, 32px);
 }
 
-@media (min-width: 600px) {
-    .feature-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.feature-item {
+.feature-row {
     display: flex;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 14px;
 }
 
 .feature-icon {
     font-size: 1.25rem;
-    color: var(--accent);
     flex-shrink: 0;
+    margin-top: 3px;
 }
 
 .feature-text h4 {
-    margin: 0 0 4px 0;
-    font-size: 0.95rem;
+    margin: 0 0 6px 0;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text);
 }
 
 .feature-text p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
-    line-height: 1.4;
+    line-height: 1.6;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .landing-hero {
+        padding: var(--space-10, 48px) var(--space-5, 20px);
+    }
+
+    .feature-list {
+        grid-template-columns: 1fr;
+        padding: var(--space-8, 32px) var(--space-5, 20px);
+    }
 }
