@@ -40,7 +40,7 @@ const adminAuth = (req, res, next) => {
 
 // NEW: Protects multi-timezone management routes
 const multiAdminAuth = (req, res, next) => {
-    if (req.session && req.session.isMultiAdmin) {
+    if (req.session && (req.session.isMultiAdmin || req.session.memberId)) {
         return next();
     }
     res.status(401).json({ error: 'Authentication required. Session expired.' });
@@ -140,7 +140,7 @@ app.post('/api/auth/member-login', async (req, res) => {
 // NEW: Multi-timezone Login endpoint
 app.post('/api/multi-admin/login', (req, res) => {
     const { username, password } = req.body;
-    
+    console.log('Multi-admin login attempt:', username);
     if (username === process.env.MULTI_ADMIN_USERNAME && password === process.env.MULTI_ADMIN_PASSWORD) {
         req.session.isMultiAdmin = true; // Store multi-admin authenticated status inside the session
         return res.json({ success: true, message: 'Logged in successfully' });
@@ -201,8 +201,53 @@ app.get('/api/available-slots', async (req, res) => {
 //     }
 // });
 
+// app.post('/api/book', async (req, res) => {
+//     const { slotId, userName } = req.body;
+//     try {
+//         // Fetch the slot category first
+//         const rows = await pool.query(
+//             `SELECT slot_category FROM booking_slots WHERE slot_id = ?`,
+//             [slotId]
+//         );
+
+//         if (rows.length === 0) {
+//             return res.status(400).send("Slot not found");
+//         }
+
+//         const isStaffOrCollaborator = ['staff', 'collaborator'].includes(rows[0].slot_category);
+
+//         let result;
+
+//         if (isStaffOrCollaborator) {
+//             result = await pool.query(
+//                 `UPDATE booking_slots 
+//                  SET booked_by_id = 'WEB_VIP', booked_by_name = ?, is_available = FALSE 
+//                  WHERE slot_id = ? AND is_available = TRUE AND is_special_slot = TRUE`,
+//                 [userName, slotId]
+//             );
+//         } else {
+//             result = await pool.query(
+//                 `UPDATE booking_slots 
+//                  SET booked_by_id = 'WEB_VIP', booked_by_name = ?, is_available = FALSE 
+//                  WHERE slot_id = ? AND is_available = TRUE AND is_special_slot = FALSE`,
+//                 [userName, slotId]
+//             );
+//         }
+
+//         result.affectedRows > 0 ? res.sendStatus(200) : res.status(400).send("Slot already taken");
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Database error");
+//     }
+// });
+
 app.post('/api/book', async (req, res) => {
-    const { slotId, userName } = req.body;
+    const { slotId, userName, userId } = req.body; // Extract real Discord Snowflake ID passed from frontend
+    
+    // Default to backup values if not provided by form variables
+    const finalUserId = userId || 'WEB_VIP';
+    const finalUserName = userName || 'Unknown Student';
+
     try {
         // Fetch the slot category first
         const rows = await pool.query(
@@ -215,22 +260,21 @@ app.post('/api/book', async (req, res) => {
         }
 
         const isStaffOrCollaborator = ['staff', 'collaborator'].includes(rows[0].slot_category);
-
         let result;
 
         if (isStaffOrCollaborator) {
             result = await pool.query(
                 `UPDATE booking_slots 
-                 SET booked_by_id = 'WEB_VIP', booked_by_name = ?, is_available = FALSE 
+                 SET booked_by_id = ?, booked_by_name = ?, is_available = FALSE 
                  WHERE slot_id = ? AND is_available = TRUE AND is_special_slot = TRUE`,
-                [userName, slotId]
+                [finalUserId, finalUserName, slotId]
             );
         } else {
             result = await pool.query(
                 `UPDATE booking_slots 
-                 SET booked_by_id = 'WEB_VIP', booked_by_name = ?, is_available = FALSE 
+                 SET booked_by_id = ?, booked_by_name = ?, is_available = FALSE 
                  WHERE slot_id = ? AND is_available = TRUE AND is_special_slot = FALSE`,
-                [userName, slotId]
+                [finalUserId, finalUserName, slotId]
             );
         }
 
@@ -240,7 +284,6 @@ app.post('/api/book', async (req, res) => {
         res.status(500).send("Database error");
     }
 });
-
 
 // --- MANAGEMENT PRIVATE API ---
 
@@ -331,7 +374,8 @@ app.get('/manage', (req, res) => {
 
 // NEW: Multi-Management Page
 app.get('/multi', (req, res) => {
-    if (req.session && req.session.isMultiAdmin) {
+    // if (req.session && req.session.isMultiAdmin) {
+    if (req.session && req.session.memberId) {
         return res.sendFile(path.join(__dirname, 'views/calendarMultiTimezone.html'));
     }
     res.redirect('/multi-login');
@@ -498,6 +542,33 @@ app.patch('/api/todo/tasks/:id/status', memberAuth, async (req, res) => {
     }
 });
 
+
+// --- DISCORD USER PROFILE SEARCH PROXY ---
+app.get('/api/discord-lookup', async (req, res) => {
+    const targetName = req.query.name;
+    if (!targetName) return res.status(400).send("Name parameter missing.");
+
+    try {
+        // Point this to your standalone discord bot's port (e.g., Port 3001)
+        const botPort = process.env.DISCORD_BOT_PORT || 3005;
+        const botResponse = await fetch(`http://localhost:${botPort}/api/user-by-username?name=${encodeURIComponent(targetName)}`);
+        
+        if (botResponse.status === 404) {
+            return res.status(404).send("User not found in the Discord server.");
+        }
+        
+        if (!botResponse.ok) {
+            return res.status(500).send("Error response from internal Discord bot.");
+        }
+
+        const data = await botResponse.json();
+        res.json(data); // Pass data directly back to frontend layout
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Could not connect to Discord bot endpoint.");
+    }
+});
+
 // Start Server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`🚀 Portal running on http://localhost:${PORT}`));

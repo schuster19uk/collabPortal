@@ -97,6 +97,23 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (err) { failureCallback(err); }
         },
 
+        // eventClick: function(info) {
+        //     const props = info.event.extendedProps;
+        //     selectedEvent = info.event;
+
+        //     if (props.available) {
+        //         const matchedRaw = rawFetchedSlots.find(s => String(s.id) === String(info.event.id));
+        //         const baseTime = matchedRaw ? new Date(matchedRaw.start) : info.event.start;
+        //         if (baseTime < new Date()) { alert("This slot has already started or passed."); return; }
+        //         const userName = prompt(`Booking selection window.\n\nEnter your name to claim:`);
+        //         if (userName && userName.trim()) bookSlot(info.event.id, userName.trim());
+        //         return;
+        //     }
+
+        //     modalNoShowBtn.style.display = props.noShow ? 'none' : 'block';
+        //     modalTitle.innerText = `Manage Slot: ${selectedEvent.title}`;
+        //     modal.showModal();
+        // }
         eventClick: function(info) {
             const props = info.event.extendedProps;
             selectedEvent = info.event;
@@ -105,8 +122,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const matchedRaw = rawFetchedSlots.find(s => String(s.id) === String(info.event.id));
                 const baseTime = matchedRaw ? new Date(matchedRaw.start) : info.event.start;
                 if (baseTime < new Date()) { alert("This slot has already started or passed."); return; }
-                const userName = prompt(`Booking selection window.\n\nEnter your name to claim:`);
-                if (userName && userName.trim()) bookSlot(info.event.id, userName.trim());
+                
+                // 1. Prompt for exact Discord username
+                const discordUsername = prompt(`Booking Window — Admin Overrides\n\nEnter the student's exact Discord username (lowercase):`);
+                if (discordUsername && discordUsername.trim()) {
+                    // Start the lookup and verification sequence
+                    lookupAndBookSlot(info.event.id, discordUsername.trim());
+                }
                 return;
             }
 
@@ -114,20 +136,61 @@ document.addEventListener('DOMContentLoaded', function() {
             modalTitle.innerText = `Manage Slot: ${selectedEvent.title}`;
             modal.showModal();
         }
+
     });
 
     tzSelectorEl.addEventListener('change', () => calendar.refetchEvents());
 
-    async function bookSlot(slotId, userName) {
+    // async function bookSlot(slotId, userName) {
+    //     try {
+    //         const response = await fetch('/api/book', {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({ slotId, userName })
+    //         });
+    //         if (response.ok) calendar.refetchEvents();
+    //         else alert("Booking failed: " + await response.text());
+    //     } catch (err) { alert("Connection error."); }
+    // }
+
+    async function lookupAndBookSlot(slotId, discordUsername) {
         try {
+            // Call our server backend proxy to check the bot cache
+            const lookupResponse = await fetch(`/api/discord-lookup?name=${encodeURIComponent(discordUsername)}`);
+            
+            if (!lookupResponse.ok) {
+                const errText = await lookupResponse.text();
+                alert(`Error finding user: ${errText || "User not found in Discord server."}`);
+                return;
+            }
+
+            const discordUser = await lookupResponse.json();
+            
+            // Confirm with operator to avoid wrong bookings
+            const confirmBooking = confirm(`User Found!\n\nDisplay Name: ${discordUser.displayName}\nUsername: ${discordUser.username}\nID: ${discordUser.id}\n\nProceed with booking this slot?`);
+            
+            if (!confirmBooking) return;
+
+            // Send both ID and username to our booking API
             const response = await fetch('/api/book', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ slotId, userName })
+                body: JSON.stringify({ 
+                    slotId, 
+                    userName: discordUser.username, // Save profile handle
+                    userId: discordUser.id          // Save critical Discord Snowflake ID
+                })
             });
-            if (response.ok) calendar.refetchEvents();
-            else alert("Booking failed: " + await response.text());
-        } catch (err) { alert("Connection error."); }
+
+            if (response.ok) {
+                calendar.refetchEvents();
+            } else {
+                alert("Booking failed: " + await response.text());
+            }
+        } catch (err) { 
+            console.error(err);
+            alert("Connection error during lookup sequence."); 
+        }
     }
 
     modalNoShowBtn.addEventListener('click', async () => {
