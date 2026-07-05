@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalNoShowBtn = document.getElementById('modalNoShowBtn');
     const modalCancelBtn = document.getElementById('modalCancelBtn');
     const modalCloseBtn  = document.getElementById('modalCloseBtn');
+    const logoutBtn      = document.getElementById('logoutBtn');
 
     let selectedEvent = null;
     let isMobile = window.innerWidth < 768;
@@ -114,6 +115,23 @@ document.addEventListener('DOMContentLoaded', function() {
         //     modalTitle.innerText = `Manage Slot: ${selectedEvent.title}`;
         //     modal.showModal();
         // }
+
+                // ── NEW: custom two-line event rendering ──
+        eventContent: function(arg) {
+            const parts = arg.event.title.split(' - ');
+            const type = parts[0] || 'Slot';
+            const rest = parts.slice(1).join(' - ') || 'Available';
+
+            return {
+                html: `
+                    <div class="fc-event-line1">${arg.timeText} · ${type}</div>
+                    <div class="fc-event-line2">${rest}</div>
+                `
+            };
+        },
+
+
+
         eventClick: function(info) {
             const props = info.event.extendedProps;
             selectedEvent = info.event;
@@ -160,16 +178,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!lookupResponse.ok) {
                 const errText = await lookupResponse.text();
-                alert(`Error finding user: ${errText || "User not found in Discord server."}`);
+                //alert(`Error finding user: ${errText || "User not found in Discord server."}`);
                 return;
             }
 
             const discordUser = await lookupResponse.json();
             
             // Confirm with operator to avoid wrong bookings
-            const confirmBooking = confirm(`User Found!\n\nDisplay Name: ${discordUser.displayName}\nUsername: ${discordUser.username}\nID: ${discordUser.id}\n\nProceed with booking this slot?`);
+            // const confirmBooking = confirm(`User Found!\n\nDisplay Name: ${discordUser.displayName}\nUsername: ${discordUser.username}\nID: ${discordUser.id}\n\nProceed with booking this slot?`);
             
-            if (!confirmBooking) return;
+            // if (!confirmBooking) return;
 
             // Send both ID and username to our booking API
             const response = await fetch('/api/book', {
@@ -214,6 +232,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     modalCloseBtn.addEventListener('click', () => modal.close());
+
+    logoutBtn.addEventListener('click', async () => {
+        if (confirm("Are you sure you want to logout?")) {
+            try {
+                const res = await fetch('/api/admin/logout', { method: 'POST' });
+                if (res.ok) window.location.href = '/multi-login';
+                else alert("Logout failed.");
+            } catch { alert("Network error trying to log out."); }
+        }
+    });
 
     calendar.render();
 });

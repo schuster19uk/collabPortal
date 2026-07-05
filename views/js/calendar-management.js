@@ -1,5 +1,4 @@
-
-      document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
         const calendarEl   = document.getElementById('calendar');
         const logoutBtn    = document.getElementById('logoutBtn');
         const modal        = document.getElementById('bookingModal');
@@ -53,12 +52,12 @@
                     const data = await res.json();
                     const formatted = data.map(row => ({
                         id: row.id,
-                        title: row.title + ' ' + row.slot_category,
+                        title: row.title,
                         start: row.start,
                         backgroundColor: row.title.includes('🚩') ? '#f43f5e' :
                                          (row.title === 'Available' ? '#22d3a0' : '#3b82f6'),
                         allDay: false,
-                        extendedProps: { available: row.is_available, noShow: row.is_no_show }
+                        extendedProps: { available: row.is_available, noShow: row.is_no_show, category: row.slot_category }
                     }));
                     successCallback(formatted);
                     calendar.render();
@@ -67,6 +66,23 @@
                     failureCallback(err);
                 }
             },
+
+            // ── Custom two-line event rendering: time+category on line 1, booker/status on line 2 ──
+            eventContent: function(arg) {
+                const category = arg.event.extendedProps.category || 'Slot';
+                const rest = arg.event.title || 'Available';
+
+                return {
+                    html: `
+                        <div class="fc-event-line1">
+                            <span class="fc-event-time-part">${arg.timeText}</span>
+                            <span class="fc-event-category-part">· ${category}</span>
+                        </div>
+                        <div class="fc-event-line2">${rest}</div>
+                    `
+                };
+            },
+
 
             eventClick: function(info) {
                 const props = info.event.extendedProps;
@@ -113,4 +129,3 @@
             }
         });
       });
-    

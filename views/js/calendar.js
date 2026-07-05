@@ -39,12 +39,36 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const res = await fetch('/api/available-slots');
                 const data = await res.json();
-                const formatted = data.map(row => ({
-                    id: row.id, title: row.title, start: row.start,
-                    backgroundColor: '#22d3a0', borderColor: '#16a37a'
-                }));
+                const formatted = data.map(row => {
+                    // Server sends title as "{category} - Available"
+                    const [category, ...statusParts] = row.title.split(' - ');
+                    const status = statusParts.join(' - ') || 'Available';
+                    return {
+                        id: row.id,
+                        title: status,
+                        start: row.start,
+                        backgroundColor: '#22d3a0', borderColor: '#16a37a',
+                        extendedProps: { category: category || 'Slot' }
+                    };
+                });
                 successCallback(formatted);
             } catch (err) { failureCallback(err); }
+        },
+
+        // ── NEW: custom two-line event rendering ──
+        eventContent: function(arg) {
+            const category = arg.event.extendedProps.category || 'Slot';
+            const rest = arg.event.title || 'Available';
+
+            return {
+                html: `
+                    <div class="fc-event-line1">
+                        <span class="fc-event-time-part">${arg.timeText}</span>
+                        <span class="fc-event-category-part">· ${category}</span>
+                    </div>
+                    <div class="fc-event-line2">${rest}</div>
+                `
+            };
         },
 
         eventClick: function(info) {
