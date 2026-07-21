@@ -59,12 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
         eventContent: function(arg) {
             const category = arg.event.extendedProps.category || 'Slot';
             const rest = arg.event.title || 'Available';
+            const categorySlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
             return {
                 html: `
                     <div class="fc-event-line1">
                         <span class="fc-event-time-part">${arg.timeText}</span>
-                        <span class="fc-event-category-part">· ${category}</span>
+                        <span class="fc-event-category-part cat-${categorySlug}">· ${category}</span>
                     </div>
                     <div class="fc-event-line2">${rest}</div>
                 `

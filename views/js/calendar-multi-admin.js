@@ -12,6 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
     let isMobile = window.innerWidth < 768;
     let rawFetchedSlots = [];
 
+    // ── Category background colors ──
+    function getCategoryColor(category) {
+        const slug = (category || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const colors = {
+            collaborator: '#22c55e',
+            staff: '#eab308',
+            onstream: '#a855f7'
+        };
+        return colors[slug] || '#3b82f6';
+    }
+
     function handleAuthError() {
         alert("Your session has expired. Please log in again.");
         window.location.href = '/multi-login';
@@ -85,12 +96,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const shifted = shiftToZone(row.start, selectedZone);
                     return {
                         id: row.id,
-                        title: row.title + (row.slot_category ? ` [${row.slot_category}]` : ''),
+                        title: row.title,
                         start: shifted.toISOString().replace("Z", ""),
                         backgroundColor: row.title.includes('🚩') ? '#f43f5e' :
-                                         (row.title === 'Available' ? '#22d3a0' : '#3b82f6'),
+                                         (row.is_available ? '#22d3a0' : getCategoryColor(row.slot_category)),
                         allDay: false,
-                        extendedProps: { available: row.is_available, noShow: row.is_no_show }
+                        extendedProps: { available: row.is_available, noShow: row.is_no_show, category: row.slot_category || 'Slot' }
                     };
                 });
                 successCallback(formatted);
@@ -118,13 +129,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // ── NEW: custom two-line event rendering ──
         eventContent: function(arg) {
-            const parts = arg.event.title.split(' - ');
-            const type = parts[0] || 'Slot';
-            const rest = parts.slice(1).join(' - ') || 'Available';
+            const category = arg.event.extendedProps.category || 'Slot';
+            const rest = arg.event.title || 'Available';
+            const categorySlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
             return {
                 html: `
-                    <div class="fc-event-line1">${arg.timeText} · ${type}</div>
+                    <div class="fc-event-line1">
+                        <span class="fc-event-time-part">${arg.timeText}</span>
+                        <span class="fc-event-category-part cat-${categorySlug}">· ${category}</span>
+                    </div>
                     <div class="fc-event-line2">${rest}</div>
                 `
             };
